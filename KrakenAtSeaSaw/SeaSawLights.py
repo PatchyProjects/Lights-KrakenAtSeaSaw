@@ -8,16 +8,17 @@
 import time
 import opc
 import math
+from random import random
 
 from adxl345 import ADXL345
 
 adxl345 = ADXL345()
     
-numPixels = 30
+numPixels = 64
 client = opc.Client('localhost:7890')
 
 defaultVel = 20;
-defaultVelMax = 70;
+defaultVelMax = 50;
 defaultGravity = 10;
 gravity = defaultGravity;
 
@@ -25,10 +26,13 @@ tilt = 0;
 vel = 0;
 
 dist = 0;
-maxDist = 2048
+maxDist = 10000;
 
 lightLife = numPixels*[0]
 
+r = 200
+g = 50
+b = 200
 
 def clamp(n, minn, maxn):
     return max(min(maxn,n), minn)
@@ -45,7 +49,7 @@ def updateTilt():
 def updatePhysics():
     defaultVel = 20;
     defaultVelMax = 70;
-    defaultGravity = 10;
+    defaultGravity = 20;
 
     gravity = defaultGravity;
     maxVel = defaultVelMax;
@@ -65,10 +69,25 @@ def updatePhysics():
     if dist <= 0 :
         dist = maxDist -1
         vel = 0
+	reset()
     elif dist >= maxDist :
         dist = 1
         vel = 0
+	reset()
     
+    return
+
+def reset():
+    global r
+    global g
+    global b
+
+    global vel
+
+    r = 200*random()
+    g = 200*random()
+    b = 200*random()
+
     return
 
 maxLife = 100
@@ -91,7 +110,7 @@ def decayLights():
     global minLife
     global numPixels
     
-    decayRate = 5.;
+    decayRate = 2.;
     for i in range(numPixels):
         lightLife[i] = clamp(lightLife[i]-decayRate, minLife, maxLife)
     
@@ -121,14 +140,22 @@ def updateLights():
     decayLights()
     triggerLight(numLit)
     
-    r = 100
-    g = 50
-    b = 10
-    pixels = [ (0,0,0) ] * numPixels
+    global r
+    global g
+    global b
+
+
+#    r = 200	# Cool Purple
+#    g = 50	
+#    b = 200
+    pixels = [ (0,0,0) ] * numPixels * 4
     for i in range(numPixels):
         bright = getBrightness(i)
         pixels[i] = (bright*r, bright*g, bright*b)
-        
+        pixels[i+numPixels*1] = (bright*r, bright*g, bright*b)
+        pixels[i+numPixels*2] = (bright*r, bright*g, bright*b)
+        pixels[i+numPixels*3] = (bright*r, bright*g, bright*b)
+
 
     client.put_pixels(pixels)
     
@@ -152,7 +179,7 @@ def runScript():
 while True:
     runScript()
 
-    time.sleep(.05)
+    time.sleep(.01)
 
     
 

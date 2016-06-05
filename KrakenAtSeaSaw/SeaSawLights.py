@@ -18,8 +18,8 @@ numPixels = 64
 client = opc.Client('localhost:7890')
 
 defaultVel = 20;
-defaultVelMax = 50;
-defaultGravity = 10;
+defaultVelMax = 40;
+defaultGravity = 20;
 gravity = defaultGravity;
 
 tilt = 0;
@@ -33,6 +33,7 @@ lightLife = numPixels*[0]
 r = 200
 g = 50
 b = 200
+# solid purple: 250, 100, 250
 
 def clamp(n, minn, maxn):
     return max(min(maxn,n), minn)
@@ -84,9 +85,9 @@ def reset():
 
     global vel
 
-    r = 200*random()
-    g = 200*random()
-    b = 200*random()
+    r = 50*random()+ 50
+    g = 100*random()+ 100
+    b = 100*random()+100
 
     return
 
@@ -144,17 +145,49 @@ def updateLights():
     global g
     global b
 
+    r = 250	# Cool Purple
+    g = 100	
+    b = 250
 
-#    r = 200	# Cool Purple
-#    g = 50	
-#    b = 200
-    pixels = [ (0,0,0) ] * numPixels * 4
+#    headR = 0
+#    headG = 0
+#    headB = 250
+
+#    tailR = 0
+#    tailG = 250
+#    tailB = 250
+
+    headR = 250
+    headG = 100
+    headB = 250
+   
+    tailR = 250
+    tailG = 0
+    tailB = 200
+
+
+# warmOrange = [250, 100, 250] 
+
+    pixels = [ (0,25,50) ] * numPixels * 4
     for i in range(numPixels):
         bright = getBrightness(i)
-        pixels[i] = (bright*r, bright*g, bright*b)
-        pixels[i+numPixels*1] = (bright*r, bright*g, bright*b)
-        pixels[i+numPixels*2] = (bright*r, bright*g, bright*b)
-        pixels[i+numPixels*3] = (bright*r, bright*g, bright*b)
+	if bright != 0:
+            steps = 8
+            indexDiff = clamp(abs(numLit-i), 0 , steps);
+            indexDiff = steps - indexDiff;
+            adjR = bright*(headR * (indexDiff) + ( tailR*(steps-indexDiff) ) )/steps
+            adjG = bright*(headG * (indexDiff) + ( tailG*(steps-indexDiff) ) )/steps;
+            adjB = bright*(headB * (indexDiff) + ( tailB*(steps-indexDiff) ) )/steps
+
+            pixels[i] = (adjR, adjG, adjB)
+            pixels[i+numPixels*1] = (adjR, adjG, adjB)
+            pixels[i+numPixels*2] = (adjR, adjG, adjB)
+            pixels[i+numPixels*3] = (adjR, adjG, adjB)
+
+            #pixels[i] = (bright*r, bright*g, bright*b)
+            #pixels[i+numPixels*1] = (bright*r, bright*g, bright*b)
+            #pixels[i+numPixels*2] = (bright*r, bright*g, bright*b)
+            #pixels[i+numPixels*3] = (bright*r, bright*g, bright*b)
 
 
     client.put_pixels(pixels)
@@ -167,7 +200,6 @@ def runScript():
     updateLights()
     global tilt
     numLit = numPixels * ((tilt + 1)/2)    # change range from -1 to 1 -> 0 to 1
-    print("CurrTilt: "+ str(tilt) + " numLit: " + str(int(numLit)))
     
             
     

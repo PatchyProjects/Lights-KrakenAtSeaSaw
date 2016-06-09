@@ -9,6 +9,7 @@ import time
 import opc
 import math
 from random import random
+#import noise
 
 from adxl345 import ADXL345
 
@@ -130,18 +131,23 @@ def getBrightness(lightIndex):
     return brightness
 
 wavesTheta = 0
-wavesSpeed = 2;
+wavesSpeed = .1;
 
 def updateWaves(pixels):
     PI = 3.1415
     global wavesTheta
     global wavesSpeed
-    waveAmp = 1
+    waveAmp = .5
     
     wavesTheta += wavesSpeed
-    for i in range(len(pixels))
-        amp = waveAmp*(math.sin((wavesTheta+i) ) + 1)
-        pixels[i] *= amp
+    for i in range(len(pixels)):
+        amp = waveAmp*(math.sin( (wavesTheta+2*i) ) + 1)
+	amp += 1
+	#amp = noise(i)+.1
+        r = amp*pixels[i][0]
+	g = amp*pixels[i][1]
+	b = amp*pixels[i][2]
+	pixels[i] = (r,g,b)
     
     return pixels
 

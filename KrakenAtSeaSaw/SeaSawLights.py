@@ -35,6 +35,23 @@ r = 200
 g = 50
 b = 200
 # solid purple: 250, 100, 250
+strip0
+strip1
+strip2
+strip3
+
+// pixel mapping setup
+def buildStrips():
+    global strip0       // 0 and 1 are same side
+    global strip1
+    global strip2       // 2 and 3 are same side
+    global strip3
+
+    strip0 = range(0,30)
+    strip0.append(range(256,192))
+
+    return
+
 
 def clamp(n, minn, maxn):
     return max(min(maxn,n), minn)
@@ -144,7 +161,7 @@ def updateWaves(pixels):
         amp = waveAmp*(math.sin( (wavesTheta+2*i) ) + 1)
 	amp += 1
 	#amp = noise(i)+.1
-        r = amp*pixels[i][0]
+    r = amp*pixels[i][0]
 	g = amp*pixels[i][1]
 	b = amp*pixels[i][2]
 	pixels[i] = (r,g,b)
@@ -192,9 +209,16 @@ def updateLights():
 
     pixels = [ (0,25,50) ] * numPixels * 4
     pixels = updateWaves(pixels)
-    for i in range(numPixels):
+    
+    global strip0
+    
+    pixels = (0,25,50) * len(strip0)
+    
+    #for i in range(numPixels):
+     for j in range(len(strip0)):
+         i = strip0[j] # get index from mapped strip
         bright = getBrightness(i)
-	if bright != 0:
+        if bright != 0:
             steps = 8
             indexDiff = clamp(abs(numLit-i), 0 , steps);
             indexDiff = steps - indexDiff;

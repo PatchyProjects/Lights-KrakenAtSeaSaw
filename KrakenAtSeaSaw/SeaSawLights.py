@@ -129,6 +129,22 @@ def getBrightness(lightIndex):
         
     return brightness
 
+wavesTheta = 0
+wavesSpeed = 2;
+
+def updateWaves(pixels):
+    PI = 3.1415
+    global wavesTheta
+    global wavesSpeed
+    waveAmp = 1
+    
+    wavesTheta += wavesSpeed
+    for i in range(len(pixels))
+        amp = waveAmp*(math.sin((wavesTheta+i) ) + 1)
+        pixels[i] *= amp
+    
+    return pixels
+
 def updateLights():
     global numPixels
     global maxDist
@@ -169,6 +185,7 @@ def updateLights():
 # warmOrange = [250, 100, 250] 
 
     pixels = [ (0,25,50) ] * numPixels * 4
+    pixels = updateWaves(pixels)
     for i in range(numPixels):
         bright = getBrightness(i)
 	if bright != 0:

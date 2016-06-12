@@ -35,20 +35,50 @@ r = 200
 g = 50
 b = 200
 # solid purple: 250, 100, 250
-strip0
-strip1
-strip2
-strip3
+strip0 = []
+strip1 = []
+strip2 = []
+strip3 = []
 
-// pixel mapping setup
+# pixel mapping setup
 def buildStrips():
-    global strip0       // 0 and 1 are same side
+    global strip0       # 0 and 1 are same side
     global strip1
-    global strip2       // 2 and 3 are same side
+    global strip2       # 2 and 3 are same side
     global strip3
 
-    strip0 = range(0,30)
-    strip0.append(range(256,192))
+    strip0 = range(0,26)
+    strip0 = strip0 + range(153, 127, -1)
+
+    strip1 = range(63,90)
+    strip1 = strip1 + range(217, 191, -1)
+
+    strip2 = range(60,34,-1)
+    strip2 = strip2 + range(163, 189)
+
+    strip3 = range(125,98, -1)
+    strip3 = strip3 + range(227, 254)
+
+
+
+#    strip0 = range(0,30)
+#    strip0 = strip0 +  range(225,256)
+
+#    strip1 = range(64,95)
+#    strip1 = strip1 + range(160, 192)
+ 
+#    strip2 = range(63,32,-1)
+#    strip2 = strip2 + range(224, 192, -1)
+
+#    strip3 = range(127,96, -1)
+#    strip3 = strip3 + range(160, 128 , -1)
+
+    print("Strip0:")
+    print( strip0)
+    print("Strip1:")
+    print(strip1)
+    print("Strip2:")
+    print(strip2)
 
     return
 
@@ -148,20 +178,20 @@ def getBrightness(lightIndex):
     return brightness
 
 wavesTheta = 0
-wavesSpeed = .1;
+wavesSpeed = .05;
 
 def updateWaves(pixels):
     PI = 3.1415
     global wavesTheta
     global wavesSpeed
-    waveAmp = .5
+    waveAmp = .3
     
     wavesTheta += wavesSpeed
     for i in range(len(pixels)):
         amp = waveAmp*(math.sin( (wavesTheta+2*i) ) + 1)
 	amp += 1
 	#amp = noise(i)+.1
-    r = amp*pixels[i][0]
+	r = amp*pixels[i][0]
 	g = amp*pixels[i][1]
 	b = amp*pixels[i][2]
 	pixels[i] = (r,g,b)
@@ -211,12 +241,15 @@ def updateLights():
     pixels = updateWaves(pixels)
     
     global strip0
+    global strip1
+    global strip2
+    global strip3
     
-    pixels = (0,25,50) * len(strip0)
+#    pixels = (0,25,50) * len(strip0)
     
     #for i in range(numPixels):
-     for j in range(len(strip0)):
-         i = strip0[j] # get index from mapped strip
+    for i in range(len(strip0)):
+        j = strip0[i] # get index from mapped strip
         bright = getBrightness(i)
         if bright != 0:
             steps = 8
@@ -225,16 +258,53 @@ def updateLights():
             adjR = bright*(headR * (indexDiff) + ( tailR*(steps-indexDiff) ) )/steps
             adjG = bright*(headG * (indexDiff) + ( tailG*(steps-indexDiff) ) )/steps;
             adjB = bright*(headB * (indexDiff) + ( tailB*(steps-indexDiff) ) )/steps
-
-            pixels[i] = (adjR, adjG, adjB)
-            pixels[i+numPixels*1] = (adjR, adjG, adjB)
-            pixels[i+numPixels*2] = (adjR, adjG, adjB)
-            pixels[i+numPixels*3] = (adjR, adjG, adjB)
+	    pixels[j] = (adjR, adjG, adjB)
+#            pixels[i] = (adjR, adjG, adjB)
+#            pixels[i+numPixels*1] = (adjR, adjG, adjB)
+#            pixels[i+numPixels*2] = (adjR, adjG, adjB)
+#            pixels[i+numPixels*3] = (adjR, adjG, adjB)
 
             #pixels[i] = (bright*r, bright*g, bright*b)
             #pixels[i+numPixels*1] = (bright*r, bright*g, bright*b)
             #pixels[i+numPixels*2] = (bright*r, bright*g, bright*b)
             #pixels[i+numPixels*3] = (bright*r, bright*g, bright*b)
+    for i in range(len(strip1)):
+        j = strip1[i] # get index from mapped strip
+        bright = getBrightness(i)
+        if bright != 0:
+            steps = 8
+            indexDiff = clamp(abs(numLit-i), 0 , steps);
+            indexDiff = steps - indexDiff;
+            adjR = bright*(headR * (indexDiff) + ( tailR*(steps-indexDiff) ) )/steps
+            adjG = bright*(headG * (indexDiff) + ( tailG*(steps-indexDiff) ) )/steps;
+            adjB = bright*(headB * (indexDiff) + ( tailB*(steps-indexDiff) ) )/steps
+            pixels[j] = (adjR, adjG, adjB)
+
+    for i in range(len(strip2)):
+        j = strip2[i] # get index from mapped strip
+        bright = getBrightness(i)
+        if bright != 0:
+            steps = 8
+            indexDiff = clamp(abs(numLit-i), 0 , steps);
+            indexDiff = steps - indexDiff;
+            adjR = bright*(headR * (indexDiff) + ( tailR*(steps-indexDiff) ) )/steps
+            adjG = bright*(headG * (indexDiff) + ( tailG*(steps-indexDiff) ) )/steps;
+            adjB = bright*(headB * (indexDiff) + ( tailB*(steps-indexDiff) ) )/steps
+            pixels[j] = (adjR, adjG, adjB)
+
+    for i in range(len(strip3)):
+        j = strip3[i] # get index from mapped strip
+        bright = getBrightness(i)
+        if bright != 0:
+            steps = 8
+            indexDiff = clamp(abs(numLit-i), 0 , steps);
+            indexDiff = steps - indexDiff;
+            adjR = bright*(headR * (indexDiff) + ( tailR*(steps-indexDiff) ) )/steps
+            adjG = bright*(headG * (indexDiff) + ( tailG*(steps-indexDiff) ) )/steps;
+            adjB = bright*(headB * (indexDiff) + ( tailB*(steps-indexDiff) ) )/steps
+            pixels[j] = (adjR, adjG, adjB)
+
+
 
 
     client.put_pixels(pixels)
@@ -254,7 +324,7 @@ def runScript():
     return
 
 #---------------------------------------#
-
+buildStrips()
 while True:
     runScript()
 

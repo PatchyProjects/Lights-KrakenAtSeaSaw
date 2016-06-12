@@ -16,6 +16,7 @@ from adxl345 import ADXL345
 adxl345 = ADXL345()
     
 numPixels = 64
+allPixels = 64*4
 client = opc.Client('localhost:7890')
 
 defaultVel = 20;
@@ -29,7 +30,7 @@ vel = 0;
 dist = 0;
 maxDist = 10000;
 
-lightLife = numPixels*[0]
+lightLife = allPixels*[0]
 
 r = 200
 g = 50
@@ -59,8 +60,11 @@ def buildStrips():
     strip3 = range(125,98, -1)
     strip3 = strip3 + range(227, 254)
 
+#    strip1 = [255]
+#    strip2 = [255]
+#    strip3 = [255]
 
-
+#   Old mapping, of all lights withough physical adjustments
 #    strip0 = range(0,30)
 #    strip0 = strip0 +  range(225,256)
 
@@ -116,11 +120,13 @@ def updatePhysics():
     dist += vel
 
     if dist <= 0 :
-        dist = maxDist -1
+	dist = 0
+        # dist = maxDist -1  # continuous drips
         vel = 0
 	reset()
     elif dist >= maxDist :
-        dist = 1
+	dist = maxDist;
+        #dist = 1
         vel = 0
 	reset()
     
@@ -147,9 +153,12 @@ def triggerLight(lightIndex):
     global maxLife
     global minLife
     global numPixels
+    global allPixels
 
-    if lightIndex > 0 and lightIndex < numPixels:    # bounds check
+    if lightIndex >= 0 and lightIndex < allPixels:    # bounds check
         lightLife[int(lightIndex)] = maxLife
+	#lightLife[int(lightIndex)] = clamp(lightLife[int(lightIndex)]+10, minLife, maxLife);
+
 
     return
 
@@ -158,9 +167,10 @@ def decayLights():
     global maxLife
     global minLife
     global numPixels
+    global allPixels
     
-    decayRate = 2.;
-    for i in range(numPixels):
+    decayRate = 3.;
+    for i in range(allPixels):
         lightLife[i] = clamp(lightLife[i]-decayRate, minLife, maxLife)
     
     return
@@ -170,20 +180,20 @@ def getBrightness(lightIndex):
     global maxLife
     global minLife
     global numPixels
+    global allPixels
 
     brightness = 0
-    if lightIndex > 0 and lightIndex < numPixels:    # bounds check
+    if lightIndex >= 0 and lightIndex < allPixels:    # bounds check
         brightness = lightLife[int(lightIndex)]/maxLife
         
     return brightness
 
 wavesTheta = 0
-wavesSpeed = .05;
 
 def updateWaves(pixels):
     PI = 3.1415
     global wavesTheta
-    global wavesSpeed
+    wavesSpeed = 0.025
     waveAmp = .3
     
     wavesTheta += wavesSpeed
@@ -198,17 +208,46 @@ def updateWaves(pixels):
     
     return pixels
 
+def lightTest():
+    global strip0
+    global strip1
+    global strip2
+    global strip3
+
+    r = 255
+    g = 0
+    b = 0
+
+    size = len(strip0)
+    pixels = [ (0,0,50) ] * numPixels * 4
+    for i in range(size):
+        pixels = [ (0,0,50) ] * numPixels * 4
+        j = strip0[i] # get index from mapped strip
+        decayLights()
+        triggerLight(j)
+        bright  = getBrightness(j)
+        pixels[j] = (bright*r,bright* g, bright*b )
+        client.put_pixels(pixels)
+        time.sleep(0.1)
+
+
+
+    client.put_pixels(pixels)
+
+
+    return
+	
+
 def updateLights():
     global numPixels
     global maxDist
     global dist
 
 
-    distPerPix = math.floor(maxDist/numPixels)
-    numLit = clamp(dist/distPerPix, 0, numPixels-1)
+#    distPerPix = math.floor(maxDist/numPixels)
+#    numLit = clamp(dist/distPerPix, 0, numPixels-1)
 
     decayLights()
-    triggerLight(numLit)
     
     global r
     global g
@@ -246,11 +285,17 @@ def updateLights():
     global strip3
     
 #    pixels = (0,25,50) * len(strip0)
-    
+   
+    adjNumPixels = len(strip0)
+    distPerPix = math.floor(maxDist/adjNumPixels)
+    numLit = clamp(dist/distPerPix, 0, adjNumPixels-1)
+#    print("NumLit: "+str(numLit) + " PixelIndex: " + str(strip0[int(numLit)]) )
+    triggerLight(strip0[int(numLit)])
+
     #for i in range(numPixels):
     for i in range(len(strip0)):
         j = strip0[i] # get index from mapped strip
-        bright = getBrightness(i)
+        bright = getBrightness(j)
         if bright != 0:
             steps = 8
             indexDiff = clamp(abs(numLit-i), 0 , steps);
@@ -268,9 +313,15 @@ def updateLights():
             #pixels[i+numPixels*1] = (bright*r, bright*g, bright*b)
             #pixels[i+numPixels*2] = (bright*r, bright*g, bright*b)
             #pixels[i+numPixels*3] = (bright*r, bright*g, bright*b)
+
+    adjNumPixels = len(strip1)
+    distPerPix = math.floor(maxDist/adjNumPixels)
+    numLit = clamp(dist/distPerPix, 0, adjNumPixels-1)
+    triggerLight(strip1[int(numLit)])
+
     for i in range(len(strip1)):
         j = strip1[i] # get index from mapped strip
-        bright = getBrightness(i)
+        bright = getBrightness(j)
         if bright != 0:
             steps = 8
             indexDiff = clamp(abs(numLit-i), 0 , steps);
@@ -279,10 +330,16 @@ def updateLights():
             adjG = bright*(headG * (indexDiff) + ( tailG*(steps-indexDiff) ) )/steps;
             adjB = bright*(headB * (indexDiff) + ( tailB*(steps-indexDiff) ) )/steps
             pixels[j] = (adjR, adjG, adjB)
+
+
+    adjNumPixels = len(strip2)
+    distPerPix = math.floor(maxDist/adjNumPixels)
+    numLit = clamp(dist/distPerPix, 0, adjNumPixels-1)
+    triggerLight(strip2[int(numLit)])
 
     for i in range(len(strip2)):
         j = strip2[i] # get index from mapped strip
-        bright = getBrightness(i)
+        bright = getBrightness(j)
         if bright != 0:
             steps = 8
             indexDiff = clamp(abs(numLit-i), 0 , steps);
@@ -292,9 +349,13 @@ def updateLights():
             adjB = bright*(headB * (indexDiff) + ( tailB*(steps-indexDiff) ) )/steps
             pixels[j] = (adjR, adjG, adjB)
 
+    adjNumPixels = len(strip3)
+    distPerPix = math.floor(maxDist/adjNumPixels)
+    numLit = clamp(dist/distPerPix, 0, adjNumPixels-1)
+    triggerLight(strip3[int(numLit)])
     for i in range(len(strip3)):
         j = strip3[i] # get index from mapped strip
-        bright = getBrightness(i)
+        bright = getBrightness(j)
         if bright != 0:
             steps = 8
             indexDiff = clamp(abs(numLit-i), 0 , steps);
@@ -314,6 +375,7 @@ def updateLights():
 def runScript():
     updateTilt()
     updatePhysics()
+#    lightTest()
     updateLights()
     global tilt
     numLit = numPixels * ((tilt + 1)/2)    # change range from -1 to 1 -> 0 to 1
@@ -328,7 +390,8 @@ buildStrips()
 while True:
     runScript()
 
-    time.sleep(.01)
+    #time.sleep(.1)
+    time.sleep(.005)
 
     
 

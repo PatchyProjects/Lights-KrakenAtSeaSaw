@@ -51,13 +51,13 @@ def buildStrips():
     strip0 = range(0,26)
     strip0 = strip0 + range(153, 127, -1)
 
-    strip1 = range(63,90)
+    strip1 = range(64,90)
     strip1 = strip1 + range(217, 191, -1)
 
-    strip2 = range(60,34,-1)
+    strip2 = range(59,34,-1)
     strip2 = strip2 + range(163, 189)
 
-    strip3 = range(125,98, -1)
+    strip3 = range(124,98, -1)
     strip3 = strip3 + range(227, 254)
 
 #    strip1 = [255]
@@ -94,15 +94,15 @@ def updateTilt():
     global tilt
     
     axes = adxl345.getAxes(True)
-    tilt = float(axes['x'])
+    tilt = float(axes['y'])/2
     print("currentTilt   x = %.3fG" % ( tilt ) )
 
     return
 
 def updatePhysics():
     defaultVel = 20;
-    defaultVelMax = 70;
-    defaultGravity = 20;
+    defaultVelMax = 80;
+    defaultGravity = 10;
 
     gravity = defaultGravity;
     maxVel = defaultVelMax;

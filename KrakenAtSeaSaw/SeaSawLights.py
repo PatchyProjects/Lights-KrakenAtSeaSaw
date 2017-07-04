@@ -94,14 +94,15 @@ def updateTilt():
     global tilt
     
     axes = adxl345.getAxes(True)
-    tilt = float(axes['y'])/2
+#    tilt = float(axes['y'])/2 # original
+    tilt = float(axes['y'])
     print("currentTilt   x = %.3fG" % ( tilt ) )
 
     return
 
 def updatePhysics():
     defaultVel = 20;
-    defaultVelMax = 80;
+    defaultVelMax = 120; # original was 80
     defaultGravity = 10;
 
     gravity = defaultGravity;
@@ -219,9 +220,9 @@ def lightTest():
     b = 0
 
     size = len(strip0)
-    pixels = [ (0,0,50) ] * numPixels * 4
+    pixels = [ (0,0,75) ] * numPixels * 4
     for i in range(size):
-        pixels = [ (0,0,50) ] * numPixels * 4
+        pixels = [ (0,0,75) ] * numPixels * 4
         j = strip0[i] # get index from mapped strip
         decayLights()
         triggerLight(j)
@@ -276,7 +277,7 @@ def updateLights():
 
 # warmOrange = [250, 100, 250] 
 
-    pixels = [ (0,25,50) ] * numPixels * 4
+    pixels = [ (0,50,100) ] * numPixels * 4
     pixels = updateWaves(pixels)
     
     global strip0
